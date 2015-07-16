@@ -1,18 +1,24 @@
 # Copyright 2015 Jakub Kopański <jkopanski@quivade.com>
 # Distributed under the terms of the GNU General Public License v2
 
+XSERVER_V="1.17.2"
+PATCHV="117"
+
 if ever is_scm ; then
     SCM_REPOSITORY="https://github.com/TigerVNC/"
+    DOWNLOADS="http://xorg.freedesktop.org/releases/individual/xserver/xorg-server-${XSERVER_V}.tar.bz2"
 
     require scm-git
 else
-    SUFFIX=gz
-    DOWNLOADS="https://github.com/TigerVNC/${PN}/archive/v${PV}.tar.${SUFFIX}"
+    DOWNLOADS="
+        https://github.com/TigerVNC/${PN}/archive/v${PV}.tar.gz -> ${PNV}.tar.gz
+        http://xorg.freedesktop.org/releases/individual/xserver/xorg-server-${XSERVER_V}.tar.bz2
+"
 fi
 
 require cmake [ api=2 ]
 
-export_exlib_phases src_configure
+export_exlib_phases src_prepare src_configure src_compile src_install
 
 SUMMARY="TigerVNC is a implementation of VNC (Virtual Network Computing)"
 DESCRIPTION="
@@ -47,7 +53,7 @@ DEPENDENCIES="
         media-libs/libjpeg-turbo
         nls? ( sys-devel/gettext )
         sys-libs/zlib
-        x11-libs/fltk
+        x11-libs/fltk[>=1.3.3]
         x11-libs/libICE
         x11-libs/libSM
         x11-libs/libX11
@@ -57,6 +63,16 @@ DEPENDENCIES="
 "
 
 BUGS_TO="jkopanski@quivade.com"
+
+tigervnc_src_prepare() {
+    edo mkdir "${WORK}"/unix
+    edo cp -R "${WORKBASE}"/"${PNV}"/unix/xserver "${WORK}"/unix/
+    edo cp -R "${WORKBASE}"/xorg-server-"$XSERVER_V"/* "${WORK}"/unix/xserver/
+
+    cd "${WORK}"/unix/xserver/
+    expatch -p1 "${WORKBASE}"/"${PNV}"/unix/xserver"${PATCHV}".patch
+    autoreconf -fiv
+}
 
 tigervnc_src_configure() {
     local args=(
@@ -69,4 +85,70 @@ tigervnc_src_configure() {
     )
 
     ecmake "${args[@]}"
+
+    local myconf=(
+        --localstatedir=/var
+        --enable-dri
+        --enable-dri2
+        --enable-dri3
+        --enable-glamor
+        --enable-glx
+        --enable-glx-tls
+        --disable-config-hal
+        --disable-config-udev
+        --disable-config-udev-kms
+        --disable-docs
+        --disable-devel-docs
+        --disable-dmx
+        --disable-install-libxf86config
+        --disable-install-setuid
+        --disable-kdrive
+        --disable-libunwind
+        --disable-static
+        --disable-tslib
+        --disable-xephyr
+        --disable-xfake
+        --disable-xfbdev
+        --disable-xinerama
+        --disable-xnest
+        --disable-xorg
+        --disable-xvfb
+        --disable-xwayland
+        --with-fontrootdir=/usr/share/fonts/X11
+        --with-sha1=libcrypto
+        --without-dtrace
+        --without-fop
+        $(expecting_tests && echo --enable-unit-tests || echo --disable-unit-tests)
+        $(option_enable debug)
+    ) 
+    cd "${WORK}"/unix/xserver/
+    econf \
+        "${XORG_SERVER_SRC_CONFIGURE_PARAMS[@]}" \
+        "${myconf[@]}"   
+}
+
+tigervnc_src_compile() {
+    default
+
+    cd "${WORK}"/unix/xserver/
+    emake \
+        "${DEFAULT_SRC_COMPILE_PARAMS[@]}" \
+        TIGERVNC_SRCDIR="${WORKBASE}"/"${PNV}"
+}
+
+tigervnc_src_install() {
+    cmake_src_install
+
+    edo mv "${IMAGE}"/usr/$(exhost --target)/share "${IMAGE}"/usr/share/
+
+    cd "${WORK}"/unix/xserver/
+    emake -j1 DESTDIR="${IMAGE}" "${DEFAULT_SRC_INSTALL_PARAMS[@]}" install   
+
+    edo rm "${IMAGE}"/usr/share/X11/xkb/compiled/README.compiled
+    edo rmdir "${IMAGE}"/usr/share/X11/xkb/compiled/
+    edo rmdir "${IMAGE}"/usr/share/X11/xkb/
+    edo rmdir "${IMAGE}"/usr/share/X11/
+
+    edo rm "${IMAGE}"/usr/share/man/man1/Xserver.1
+    edo rm "${IMAGE}"/usr/x86_64-pc-linux-gnu/lib/xorg/protocol.txt
 }
