@@ -1,0 +1,53 @@
+diff -Naur tigervnc-1.5.0/common/network/TcpSocket.cxx tigervnc-1.5.0.inetd/common/network/TcpSocket.cxx
+--- tigervnc-1.5.0/common/network/TcpSocket.cxx	2015-07-11 15:00:36.000000000 +0200
++++ tigervnc-1.5.0.inetd/common/network/TcpSocket.cxx	2015-07-29 21:23:52.062492643 +0200
+@@ -369,18 +369,12 @@
+ #endif
+ }
+ 
+-bool TcpSocket::isSocket(int sock)
++bool TcpSocket::isListening(int sock)
+ {
+-  vnc_sockaddr_t sa;
+-  socklen_t sa_size = sizeof(sa);
+-  return getsockname(sock, &sa.u.sa, &sa_size) >= 0;
+-}
+-
+-bool TcpSocket::isConnected(int sock)
+-{
+-  vnc_sockaddr_t sa;
+-  socklen_t sa_size = sizeof(sa);
+-  return getpeername(sock, &sa.u.sa, &sa_size) >= 0;
++  int listening;
++  socklen_t listening_size = sizeof(listening);
++  return getsockopt(sock, SOL_SOCKET, SO_ACCEPTCONN, &listening,
++                    &listening_size) >= 0 && listening;
+ }
+ 
+ int TcpSocket::getSockPort(int sock)
+diff -Naur tigervnc-1.5.0/common/network/TcpSocket.h tigervnc-1.5.0.inetd/common/network/TcpSocket.h
+--- tigervnc-1.5.0/common/network/TcpSocket.h	2015-07-11 15:00:36.000000000 +0200
++++ tigervnc-1.5.0.inetd/common/network/TcpSocket.h	2015-07-29 21:12:43.387624369 +0200
+@@ -65,8 +65,7 @@
+ 
+     static bool enableNagles(int sock, bool enable);
+     static bool cork(int sock, bool enable);
+-    static bool isSocket(int sock);
+-    static bool isConnected(int sock);
++    static bool isListening(int sock);
+     static int getSockPort(int sock);
+   private:
+     bool closeFd;
+diff -Naur tigervnc-1.5.0/unix/xserver/hw/vnc/vncExtInit.cc tigervnc-1.5.0.inetd/unix/xserver/hw/vnc/vncExtInit.cc
+--- tigervnc-1.5.0/unix/xserver/hw/vnc/vncExtInit.cc	2015-07-11 15:00:36.000000000 +0200
++++ tigervnc-1.5.0.inetd/unix/xserver/hw/vnc/vncExtInit.cc	2015-07-29 21:12:43.387624369 +0200
+@@ -137,8 +137,7 @@
+         std::list<network::TcpListener> listeners;
+         std::list<network::TcpListener> httpListeners;
+         if (scr == 0 && vncInetdSock != -1) {
+-          if (network::TcpSocket::isSocket(vncInetdSock) &&
+-              !network::TcpSocket::isConnected(vncInetdSock))
++          if (network::TcpSocket::isListening(vncInetdSock))
+           {
+             listeners.push_back (network::TcpListener(vncInetdSock));
+             vlog.info("inetd wait");

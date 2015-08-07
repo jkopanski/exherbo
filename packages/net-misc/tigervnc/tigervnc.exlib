@@ -4,19 +4,9 @@
 XSERVER_V="1.17.2"
 PATCHV="117"
 
-if ever is_scm ; then
-    SCM_REPOSITORY="https://github.com/TigerVNC/"
-    DOWNLOADS="http://xorg.freedesktop.org/releases/individual/xserver/xorg-server-${XSERVER_V}.tar.bz2"
+require cmake [ api=2 ] github [ user=TigerVNC pn=${PN} tag=v${PV} ] systemd-service
 
-    require scm-git
-else
-    DOWNLOADS="
-        https://github.com/TigerVNC/${PN}/archive/v${PV}.tar.gz -> ${PNV}.tar.gz
-        http://xorg.freedesktop.org/releases/individual/xserver/xorg-server-${XSERVER_V}.tar.bz2
-"
-fi
-
-require cmake [ api=2 ]
+DOWNLOADS+=" http://xorg.freedesktop.org/releases/individual/xserver/xorg-server-${XSERVER_V}.tar.bz2"
 
 export_exlib_phases src_prepare src_configure src_compile src_install
 
@@ -65,8 +55,10 @@ DEPENDENCIES="
 BUGS_TO="jkopanski@quivade.com"
 
 tigervnc_src_prepare() {
-    edo mkdir "${WORK}"/unix
-    edo cp -R "${WORKBASE}"/"${PNV}"/unix/xserver "${WORK}"/unix/
+    cd "${WORKBASE}"/"${PNV}"
+    expatch -p1 "${FILES}"/tigervnc-inetd-nowait.patch
+    expatch -p1 "${FILES}"/tigervnc-vncIsTCPPortUsed.patch
+
     edo cp -R "${WORKBASE}"/xorg-server-"$XSERVER_V"/* "${WORK}"/unix/xserver/
 
     cd "${WORK}"/unix/xserver/
@@ -77,7 +69,7 @@ tigervnc_src_prepare() {
 tigervnc_src_configure() {
     local args=(
         -DBUILD_JAVA:BOOL=$(option java ON OFF)
-        -DCMAKE_BUILD_TYPE=$(option debug Debug Release)
+        -DCMAKE_BUILD_TYPE:STRING=$(option debug Debug Release) 
         -DENABLE_GNUTLS:BOOL=$(option gnutls ON OFF)
         -DENABLE_NLS:BOOL=$(option nls ON OFF)
         -DENABLE_PAM:BOOL=$(option pam ON OFF)
@@ -88,19 +80,26 @@ tigervnc_src_configure() {
 
     local myconf=(
         --localstatedir=/var
-        --enable-dri
-        --enable-dri2
-        --enable-dri3
-        --enable-glamor
-        --enable-glx
-        --enable-glx-tls
+        --disable-dri
+        --disable-dri2
+        --disable-dri3
+        --disable-glamor
+        --disable-glx
+        --disable-glx-tls
+        --enable-install-libxf86config
+        --enable-listen-local
+        --enable-listen-tcp
+        --enable-listen-unix
+        --enable-registry
+        --enable-xdmcp
+        --disable-xshmfence
+        --disable-config-dbus
         --disable-config-hal
         --disable-config-udev
         --disable-config-udev-kms
         --disable-docs
         --disable-devel-docs
         --disable-dmx
-        --disable-install-libxf86config
         --disable-install-setuid
         --disable-kdrive
         --disable-libunwind
@@ -114,6 +113,7 @@ tigervnc_src_configure() {
         --disable-xorg
         --disable-xvfb
         --disable-xwayland
+        --disable-xwin
         --with-fontrootdir=/usr/share/fonts/X11
         --with-sha1=libcrypto
         --without-dtrace
@@ -151,4 +151,11 @@ tigervnc_src_install() {
 
     edo rm "${IMAGE}"/usr/share/man/man1/Xserver.1
     edo rm "${IMAGE}"/usr/x86_64-pc-linux-gnu/lib/xorg/protocol.txt
+
+    install_systemd_files
+
+    hereconfd xvnc.conf <<EOF
+# See Xvnc(1) and Xserver(1) man page
+XVNC_OPTS="-query localhost -once -SecurityTypes None"
+EOF
 }

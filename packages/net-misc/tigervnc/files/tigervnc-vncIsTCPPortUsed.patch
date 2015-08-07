@@ -1,0 +1,13 @@
+diff -rupN tigervnc-1.5.0/unix/xserver/hw/vnc/RFBGlue.cc tigervnc-1.5.0.vncIsTCPPortUsed/unix/xserver/hw/vnc/RFBGlue.cc
+--- tigervnc-1.5.0/unix/xserver/hw/vnc/RFBGlue.cc	2015-07-11 15:00:36.000000000 +0200
++++ tigervnc-1.5.0.vncIsTCPPortUsed/unix/xserver/hw/vnc/RFBGlue.cc	2015-08-06 09:00:34.262054118 +0200
+@@ -194,7 +194,7 @@ int vncIsTCPPortUsed(int port)
+     std::list<network::TcpListener> dummy;
+     network::createTcpListeners (&dummy, 0, port);
+   } catch (rdr::Exception& e) {
+-    return 0;
++    return 1;
+   }
+-  return 1;
++  return 0;
+ }

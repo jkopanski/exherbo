@@ -1,0 +1,11 @@
+# Copyright 2015 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+[Unit]
+Description=VNC Per-connection server
+
+[Service]
+EnvironmentFile=/etc/conf.d/xvnc.conf
+ExecStart=-/usr/x86_64-pc-linux-gnu/bin/Xvnc -inetd $XVNC_OPTS
+StandardInput=socket
+StandardError=journal
