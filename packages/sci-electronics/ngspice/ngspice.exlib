@@ -1,0 +1,81 @@
+# Copyright 2013 Marvin Schmidt <marv@exherbo.org>
+# Copyright 2015 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.15 ] ]
+require sourceforge [ suffix=tar.gz ]
+
+if ever is_scm ; then
+    SCM_REPOSITORY="git://${PN}.git.sourceforge.net/gitroot/${PN}/${PN}"
+    require scm-git
+fi
+
+export_exlib_phases src_prepare src_configure
+
+SUMMARY="A mixed level/signal circuit simulator"
+DESCRIPTION="
+ngspice is a general-purpose circuit simulator program.
+It implements three classes of analysis:
+- Nonlinear DC analyses
+- Nonlinear Transient analyses
+- Linear AC analyses
+"
+if ever is_scm ; then
+    DOWNLOADS=""
+fi
+
+LICENCES="LGPL-2.1 BSD-3"
+SLOT="0"
+MYOPTIONS="
+    openmp [[ description = [ Enable parallel processing using OpenMP ] ]]
+    X [[ description = [ Build GUI tools ] ]]
+"
+
+DEPENDENCIES="
+    build+run:
+        sci-libs/fftw
+        sys-libs/readline
+        openmp? ( sys-devel/gcc:=[openmp] )
+        X? (
+            x11-libs/libX11
+            x11-libs/libXaw
+            x11-libs/libXext
+            x11-libs/libXmu
+            x11-libs/libXt
+        )
+"
+
+RESTRICT="test"
+
+ngspice_src_prepare() {
+    default
+
+    eautoreconf
+}
+
+ngspice_src_configure() {
+    local myconf=(
+        --disable-adms
+        --disable-checker
+        --disable-cluster
+        --disable-gprof
+        --disable-rpath
+        --enable-capbypass
+        --enable-cider
+        --enable-nvdev
+        --enable-predictor
+        --enable-pss
+        --enable-xspice
+        --hates=datarootdir
+        --hates=docdir
+        --with-readline
+        --without-editline
+        --without-tcl
+        $(option_enable openmp)
+        $(option_enable X xgraph)
+        $(option_with X x)
+    )
+
+    CC_FOR_BUILD=$(exhost --build)-cc econf \
+        "${myconf[@]}"
+}
