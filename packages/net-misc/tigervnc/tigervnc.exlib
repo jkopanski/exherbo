@@ -31,6 +31,7 @@ MYOPTIONS="
     java [[ description = [ Build Java TigerVNC Viewer ] ]]
     nls
     pam
+    ( providers: libressl openssl ) [[ number-selected = exactly-one ]]
 "
 
 DEPENDENCIES="
@@ -42,12 +43,19 @@ DEPENDENCIES="
         java? ( virtual/jdk )
         media-libs/libjpeg-turbo
         nls? ( sys-devel/gettext )
+        pam? ( sys-libs/pam )
+        providers:libressl? ( dev-libs/libressl:= )
+        providers:openssl? ( dev-libs/openssl )
         sys-libs/zlib
         x11-libs/fltk[>=1.3.3]
         x11-libs/libICE
         x11-libs/libSM
         x11-libs/libX11
+        x11-libs/libXau
+        x11-libs/libXdamage
+        x11-libs/libXdmcp
         x11-libs/libXext
+        x11-libs/libXfont
         x11-libs/libXtst
         !net-misc/realvnc [[ note = [ conflicting installs of vncviewer, vncpasswd ] ]]
 "
@@ -80,19 +88,20 @@ tigervnc_src_configure() {
 
     local myconf=(
         --localstatedir=/var
-        --disable-dri
-        --disable-dri2
-        --disable-dri3
-        --disable-glamor
-        --disable-glx
-        --disable-glx-tls
+        --enable-composite
+        --enable-dri
+        --enable-dri2
+        --enable-dri3
+        --enable-glamor
+        --enable-glx
+        --enable-glx-tls
         --enable-install-libxf86config
         --enable-listen-local
         --enable-listen-tcp
         --enable-listen-unix
         --enable-registry
         --enable-xdmcp
-        --disable-xshmfence
+        --enable-xshmfence
         --disable-config-dbus
         --disable-config-hal
         --disable-config-udev
