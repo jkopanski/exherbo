@@ -1,0 +1,87 @@
+# Copyright 2015 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+MY_PN=${PN}-c
+require github [ user=Unidata pn=${MY_PN} tag=v${PV} ]
+
+export_exlib_phases src_prepare src_configure src_test src_test_expensive
+
+SUMMARY="Libraries and self-describing, machine-independent data formats that support the creation, access, and sharing of array-oriented scientific data."
+DESCRIPTION="
+NetCDF (network Common Data Form) is a set of interfaces for
+array-oriented data access and a freely distributed collection of
+data access libraries for C, Fortran, C++, Java, and other languages.
+The netCDF libraries support a machine-independent format for representing scientific data.
+Together, the interfaces, libraries, and format support the creation,
+access, and sharing of scientific data.
+"
+HOMEPAGE="http://www.unidata.ucar.edu/software/${PN}/"
+
+LICENCES="netCDF"
+SLOT="0"
+MYOPTIONS="
+    debug
+    doc
+    mpi
+"
+
+DEPENDENCIES="
+    build:
+        doc? ( app-doc/doxygen )
+    build+run:
+        mpi? ( sys-cluster/openmpi )
+        net-misc/curl
+        sci-libs/hdf5[mpi=]
+        sys-libs/zlib
+"
+
+BUGS_TO="jkopanski@quivade.com"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    -enable-logging
+    --enable-hdf4-file-tests
+    --enable-netcdf-4
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    'doc doxygen'
+    'mpi parallel-tests'
+    'mpi pnetcdf'
+    'mpi static'
+)
+
+WORK="${WORKBASE}/${MY_PN}-${PV}"
+
+netcdf_src_prepare() {
+    default
+}
+
+netcdf_src_configure() {
+    local myconf=()
+
+    if option mpi; then
+        myconf+=(
+            --disable-shared
+        )
+    else
+        myconf+=(
+            --enable-shared
+        )
+    fi
+
+    if $(expecting_tests --expensive); then
+        myconf+=( --enable-large-file-tests )
+    fi
+
+    econf "${my[@]}"
+}
+
+netcdf_src_test() {
+    EXJOBS=1
+    default
+}
+
+netcdf_src_test_expensive() {
+    EXJOBS=1
+    default
+}
