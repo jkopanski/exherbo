@@ -1,0 +1,181 @@
+# Copyright 2015 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+if ever is_scm ; then
+    SCM_REPOSITORY="https://software.sandia.gov/${PN}/repositories/publicTrilinos"
+    require scm-git
+else
+    DOWNLOADS="manual: trilinos-12.2.1-Source.tar.bz2"
+fi
+
+require cmake [ api=2 ]
+
+export_exlib_phases src_unpack src_configure
+
+SUMMARY="An Object-Oriented Solver Framework"
+DESCRIPTION="
+The Trilinos Project is an effort to develop algorithms and enabling technologies
+within an object-oriented software framework for the solution of large-scale,
+complex multi-physics engineering and scientific problems.
+A unique design feature of Trilinos is its focus on packages.
+"
+HOMEPAGE="https://trilinos.org/"
+
+LICENCES="
+    BSD-3
+    LGPL-2.1
+"
+SLOT="0"
+
+# This could go into suboption one day
+TRILINOS_PACKAGES=(
+    "Amesos      Direct sparse solver package"
+    "Amesos2     Direct sparse solver package"
+    "Anasazi     Large-scale eigenvalue algorithms framework"
+    "AztecOO     Object-oriented interface the the Aztec solver"
+    "Belos       Iterative linear solvers"
+    "Claps       Collection of domain decomposition preconditioners and solvers"
+    "Didasko     Tutorial of Trilinos, quick introduction to several packages"
+    "Epetra      Fundamental routines and services that are required for linear algebra"
+    "EpetraExt   Fundamental routines and services that are required for linear algebra"
+    "Fei         Finite Element Interface to Linear Solvers"
+    "ForTrilinos Fortran interfaces to Trilinos C++ packages"
+    "Galeri      Finite element and matrix generation package"
+    "GlobiPack   Interfaces and implementations for 1D globalization capabilities"
+    "Ifpack      Object-oriented algebraic preconditioners"
+    "Ifpack2     Provides incomplete factorizations, relaxations, and domain decomposition operators"
+    "Intrepid    INteroperable Tools for Rapid dEveloPment of compatIble Discretizations"
+    "Isorropia   Combinatorial scientific computing"
+    "Kokkos      Trilinos core kernels package"
+    "Komplex     Complex linear solver package"
+    "Mesquite    Node-movement algorithms to improve the quality and/or adapt a given mesh"   
+    "ML          Multigrid preconditioning package"
+    "Moertel     Nonconforming mesh tying and contact formulations in 2 and 3 dimensions using Mortar methods"
+    "MOOCHO      Multifunctional Object-Oriented arCHitecture for Optimization"
+    "MueLu       Solve large sparse linear systems of equations arising from PDE discretizations"
+    "NOX         Package for robustly solving and analyzing large-scale systems of nonlinear equations"
+    "OptiPack    Interfaces and implementations of basic optimization algorithms based on Thyra"
+    "PAMGEN      Creates hexahedral or quadrilateral finite element meshes of simple shapes in parallel"
+    "Phalanx     Local field evaluation kernel for general partial differential equation solvers"
+    "Piro        Top-level, unifying package of the Embedded Nonlinear Analysis Capability area"
+    "Pliris      Dense solver package"
+    "PyTrilinos  Python wrappers for selected packages"
+    "ROL         Rapid Optimization Library"
+    "RTOp        Reduction/transformation operators"
+    "Rythmos     Transient integration package for ODEs and DAEs"
+    "Sacado      package for automatic differentiation (AD) of C++ code using operator overloading"
+    "SEACAS      i have no idea"
+    "SEACASIoss  i have no idea"
+    "SEACASExodus i have no idea"
+    "Shards      common tools for numerical and topological data that facilitate interoperability between modules used to solve PDEs"
+    "ShyLU       Package for solving sparse linear systems. It can be used either as a preconditioner, or as a solver"
+    "Stokhos     Package for intrusive stochastic Galerkin uncertainty quantification methods"
+    "Stratimikos unified set of Thyra-based wrappers to linear solver and preconditioner capabilities"
+    "Teko        Package for development and implementation of block preconditioners"
+    "Teuchos     Common tools for Trilinos for developers to use"
+    "Thyra       Interfaces and supporting code for interoperability between different types of numerical software"
+    "Tpetra      Parallel sparse linear algebra package"
+    "TriKota     Wrapper for the Dakota Toolkit"
+    "TrilinosCouplings Multiple packages combined for testing integrated package capabilities"
+    "Trios       Trilinos I/O Support"
+    "TriUtils    Utilities for other packages"
+    "WebTrilinos Web-based environment to use several packages through the web"
+    "Xpetra      Lightweight wrapper to both Epetra and Tpetra"
+    "Zoltan      Toolkit of parallel services for dynamic, unstructured, and/or adaptive simulations"
+    "Zoltan2     Load balancing and combinatorial package for scientific computing"
+)
+# "STK         Sierra Toolkit Mesh product provides a unstructured mesh in-memory, parallel-distributed database"
+# "Optika      GUI input methods for trilinos based programs"
+#
+MYOPTIONS="
+    debug
+    doc
+    mpi
+    openmp
+    python
+"
+# for x in "${TRILINOS_PACKAGES[@]}"; do
+#     set $x
+#     mod=$1
+#     shift
+#     description="$@"
+#     MYOPTIONS+="
+#     trilinos_packages: ${mod} [[ description = [ ${description} ] ]]
+# "
+# done
+
+DEPENDENCIES="
+    build:
+        doc? ( app-doc/doxygen )
+    build+run:
+        dev-libs/boost
+        mpi? ( sci-libs/parmetis )
+        openmp? ( sys-libs/libgomp )
+        python? ( 
+            dev-lang/python:2.7
+            dev-python/numpy[python_abis:2.7]
+        )
+        virtual/blas
+        virtual/lapack
+        sys-libs/libquadmath
+        sci-libs/matio
+        sci-libs/netcdf
+        sys-libs/libgfortran
+"
+
+BUGS_TO="jkopanski@quivade.com"
+
+trilinos_src_unpack() {
+    default
+
+    edo pushd "${WORKBASE}"
+    #unpack "${FETCHDIR}/${PNV}"-Source.tar.bz2
+    edo mv "${PNV}"-Source "${PNV}"
+    edo popd
+
+    edo mkdir "${WORK}"
+}
+
+trilinos_src_configure() {
+    local myconf=(
+        -DCMAKE_BUILD_TYPE:STRING=$(option debug Debug Release)
+        -DCMAKE_Fortran_COMPILER:PATH="$(exhost --target)-gfortran"
+        -DBUILD_SHARED_LIBS:BOOL=TRUE
+        -DTPL_ENABLE_Boost:BOOL=ON
+        -DTPL_ENABLE_BLAS:BOOL=ON
+        -DTPL_ENABLE_LAPACK:BOOL=ON
+        -DTPL_ENABLE_Matio:BOOL=ON
+        -DTPL_ENABLE_Netcdf:BOOL=ON
+        -DTPL_ENABLE_GLM:BOOL=OFF
+        -DTPL_ENABLE_QT:BOOL=OFF
+    )
+
+    local x mod
+
+    # enable all packages
+    for x in "${TRILINOS_PACKAGES[@]}"; do
+        set $x
+        mod=$1
+        myconf+=( -DTrilinos_ENABLE_${mod}:BOOL=ON )
+        #option trilinos_packages:${mod} && \
+        #    myconf+=( -DTrilinos_ENABLE_${mod}:BOOL=ON )
+    done
+
+    myconf+=( -DTrilinos_ENABLE_Optika:BOOL=OFF )
+    myconf+=( -DTPL_ENABLE_MPI:BOOL=$(option mpi ON OFF) )
+    myconf+=( -DTrilinos_ENABLE_STK:BOOL=$(option mpi ON OFF) )
+    if option mpi; then
+        myconf+=(
+            -DTPL_ENABLE_MPI:BOOL=ON
+            -DMPI_C_COMPILER:PATH=mpicc
+            -DMPI_CXX_COMPILER:PATH=mpic++
+            -DMPI_Fortan_COMPILER:PATH=mpif77
+        )
+    fi
+
+    if option openmp; then
+        myconf+=( -DTPL_ENABLE_OpenMP:BOOL=ON )
+    fi
+
+    ecmake "${myconf[@]}"
+}
