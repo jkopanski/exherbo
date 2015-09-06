@@ -120,6 +120,7 @@ DEPENDENCIES="
         sys-libs/libquadmath
         sci-libs/matio
         sci-libs/netcdf
+        sci-libs/SuiteSparse
         sys-libs/libgfortran
 "
 
@@ -141,13 +142,19 @@ trilinos_src_configure() {
         -DCMAKE_BUILD_TYPE:STRING=$(option debug Debug Release)
         -DCMAKE_Fortran_COMPILER:PATH="$(exhost --target)-gfortran"
         -DBUILD_SHARED_LIBS:BOOL=TRUE
+        -DTPL_ENABLE_AMD:BOOL=ON
         -DTPL_ENABLE_Boost:BOOL=ON
         -DTPL_ENABLE_BLAS:BOOL=ON
         -DTPL_ENABLE_LAPACK:BOOL=ON
         -DTPL_ENABLE_Matio:BOOL=ON
         -DTPL_ENABLE_Netcdf:BOOL=ON
+        -DTPL_ENABLE_UMFPACK:BOOL=ON
+        -DTPL_ENABLE_Zlib:BOOL=ON
         -DTPL_ENABLE_GLM:BOOL=OFF
         -DTPL_ENABLE_QT:BOOL=OFF
+        -DEpetraExt_BUILD_BTF:BOOL=ON
+        -DEpetraExt_BUILD_EXPERIMENTAL:BOOL=ON 
+        -DEpetraExt_BUILD_GRAPH_REORDERINGS:BOOL=ON
     )
 
     local x mod
