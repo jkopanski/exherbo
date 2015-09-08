@@ -25,7 +25,7 @@ MYOPTIONS="
 
 DEPENDENCIES="
     build+run:
-        openmp ( sys-libs/libgomp )
+        openmp? ( sys-libs/libgomp )
         sys-cluster/openmpi
 "
 
