@@ -37,43 +37,38 @@ DEPENDENCIES="
 
 BUGS_TO="jkopanski@quivade.com"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    -enable-logging
-    --enable-hdf4-file-tests
-    --enable-netcdf-4
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
-    'doc doxygen'
-    'mpi parallel-tests'
-    'mpi pnetcdf'
-    'mpi static'
-)
-
 WORK="${WORKBASE}/${MY_PN}-${PV}"
+
+# mpiexec complains about running as root
+# is it safe to enable it inside sydbox?
+RESTRICT="test"
 
 netcdf_src_prepare() {
     default
+
+    # this will enable mpi test, not sure if it's safe
+    edo sed -e 's/mpiexec/mpiexec --allow-run-as-root/' -i nc_test4/run_par_test.sh
 }
 
 netcdf_src_configure() {
-    local myconf=()
-
-    if option mpi; then
-        myconf+=(
-            --disable-shared
-        )
-    else
-        myconf+=(
-            --enable-shared
-        )
-    fi
-
+    local myconf=(
+        --enable-logging
+        --enable-hdf4-file-tests
+        --enable-netcdf-4
+        $(option_enable doc doxygen)
+        $(option_enable mpi parallel-tests)
+        $(option_enable mpi static)
+        $(option_enable !mpi shared)
+    )
     if $(expecting_tests --expensive); then
         myconf+=( --enable-large-file-tests )
     fi
 
-    econf "${my[@]}"
+    if option mpi; then
+        CC=mpicc
+    fi
+
+    CC=${CC} econf "${myconf[@]}"
 }
 
 netcdf_src_test() {
