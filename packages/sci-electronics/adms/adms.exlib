@@ -1,0 +1,45 @@
+# Copyright 2015 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+MY_PN=ADMS
+
+require cmake [ api=2 ] github [ user=QUCS pn=${MY_PN} tag=release-${PV} ]
+
+export_exlib_phases src_prepare
+
+SUMMARY="Code generator for the Verilog-A(MS) language"
+DESCRIPTION="
+ADMS is a code generator that converts electrical compact device models
+specified in high-level description language into ready-to-compile C code
+for the API of spice simulators.
+Based on transformations specified in XML language,
+ADMS transforms Verilog-AMS code into other target languages.
+"
+HOMEPAGE=""
+
+LICENCES="LGPL-2.1"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        dev-lang/perl
+        dev-perl/GD
+        dev-perl/XML-LibXML
+        sys-devel/bison
+        sys-devel/flex
+"
+
+BUGS_TO="jkopanski@quivade.com"
+
+CMAKE_SOURCE="${WORKBASE}/${MY_PN}-release-${PV}"
+
+CMAKE_SRC_CONFIGURE_PARAMS=(
+    '-DUSE_MAINTAINER_MODE:BOOL=ON'
+)
+
+adms_src_prepare() {
+    default
+
+    edo sed -e 's/LibXml/LibXML/' -i CMakeLists.txt
+}
