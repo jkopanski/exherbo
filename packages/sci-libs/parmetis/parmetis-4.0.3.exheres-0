@@ -32,13 +32,13 @@ DEPENDENCIES="
 BUGS_TO="jkopanski@quivade.com"
 
 CMAKE_SRC_CONFIGURE_PARAMS=(
+    "--hates=DCMAKE_C_COMPILER:PATH"
+    "--hates=DCMAKE_CXX_COMPILER:PATH"
     "-DCMAKE_C_COMPILER:PATH=mpicc"
     "-DCMAKE_CXX_COMPILER:PATH=mpicxx"
     "-DSHARED:BOOL=TRUE"
     "-DGKLIB_PATH:PATH=${CMAKE_SOURCE}/metis/GKlib"
     "-DMETIS_PATH:PATH=${CMAKE_SOURCE}/metis"
-    "--hates=DCMAKE_C_COMPILER"
-    "--hates=DCMAKE_CXX_COMPILER:PATH"
 )
 
 CMAKE_SRC_CONFIGURE_OPTIONS=(
@@ -54,4 +54,14 @@ src_prepare() {
 
     # ParMETIS fails with unused-labels
     edo sed -e 's/-Werror//' -i metis/GKlib/GKlibSystem.cmake
+}
+
+src_install() {
+    default
+
+    dolib.a "${WORK}"/libmetis/libmetis.a
+    #dolib.a "${WORK}"/libparmetis/libparmetis.a
+
+    insinto /usr/$(exhost --target)/include
+    doins "${CMAKE_SOURCE}"/metis/include/metis.h
 }
