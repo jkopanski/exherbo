@@ -47,6 +47,7 @@ netcdf_src_prepare() {
     default
 
     # this will enable mpi test, not sure if it's safe
+    # however sydbox will still block it
     edo sed -e 's/mpiexec/mpiexec --allow-run-as-root/' -i nc_test4/run_par_test.sh
 }
 
@@ -66,9 +67,10 @@ netcdf_src_configure() {
 
     if option mpi; then
         CC=mpicc
+        CFALGS="${CFLAGS} -fPIC"
     fi
 
-    CC=${CC} econf "${myconf[@]}"
+    CC=${CC} CFLAGS=${CFALGS} econf "${myconf[@]}"
 }
 
 netcdf_src_test() {
