@@ -59,14 +59,10 @@ TRILINOS_PACKAGES=(
     "Phalanx     Local field evaluation kernel for general partial differential equation solvers"
     "Piro        Top-level, unifying package of the Embedded Nonlinear Analysis Capability area"
     "Pliris      Dense solver package"
-    "PyTrilinos  Python wrappers for selected packages"
     "ROL         Rapid Optimization Library"
     "RTOp        Reduction/transformation operators"
     "Rythmos     Transient integration package for ODEs and DAEs"
     "Sacado      package for automatic differentiation (AD) of C++ code using operator overloading"
-    "SEACAS      i have no idea"
-    "SEACASIoss  i have no idea"
-    "SEACASExodus i have no idea"
     "Shards      common tools for numerical and topological data that facilitate interoperability between modules used to solve PDEs"
     "ShyLU       Package for solving sparse linear systems. It can be used either as a preconditioner, or as a solver"
     "Stokhos     Package for intrusive stochastic Galerkin uncertainty quantification methods"
@@ -84,15 +80,20 @@ TRILINOS_PACKAGES=(
     "Zoltan      Toolkit of parallel services for dynamic, unstructured, and/or adaptive simulations"
     "Zoltan2     Load balancing and combinatorial package for scientific computing"
 )
+
 # "STK         Sierra Toolkit Mesh product provides a unstructured mesh in-memory, parallel-distributed database"
 # "Optika      GUI input methods for trilinos based programs"
-#
+# "PyTrilinos  Python wrappers for selected packages"
+#  "SEACAS      i have no idea"
+#  "SEACASIoss  i have no idea"
+#  "SEACASExodus i have no idea"
+
 MYOPTIONS="
     debug
     doc
-    mpi
+    mpi    [[ description = [ Build parallel version ] ]]
     openmp
-    python
+    python [[ description = [ Build python wrappers for selected packages ] ]]
 "
 # for x in "${TRILINOS_PACKAGES[@]}"; do
 #     set $x
@@ -109,7 +110,11 @@ DEPENDENCIES="
         doc? ( app-doc/doxygen )
     build+run:
         dev-libs/boost
-        mpi? ( sci-libs/parmetis )
+        mpi? (
+            sci-libs/parmetis
+            sys-cluster/openmpi[fortran]
+        )
+        net-misc/curl
         openmp? ( sys-libs/libgomp )
         python? ( 
             dev-lang/python:2.7
@@ -119,15 +124,17 @@ DEPENDENCIES="
         virtual/lapack
         sys-libs/libquadmath
         sci-libs/matio
-        sci-libs/netcdf
+        sci-libs/netcdf[mpi=]
         sci-libs/SuiteSparse
         sys-libs/libgfortran
+        sys-libs/zlib
 "
 
 BUGS_TO="jkopanski@quivade.com"
 
 trilinos_src_unpack() {
     default
+
 
     edo pushd "${WORKBASE}"
     #unpack "${FETCHDIR}/${PNV}"-Source.tar.bz2
@@ -140,48 +147,89 @@ trilinos_src_unpack() {
 trilinos_src_configure() {
     local myconf=(
         -DCMAKE_BUILD_TYPE:STRING=$(option debug Debug Release)
-        -DCMAKE_Fortran_COMPILER:PATH="$(exhost --target)-gfortran"
-        -DBUILD_SHARED_LIBS:BOOL=TRUE
-        -DTPL_ENABLE_AMD:BOOL=ON
-        -DTPL_ENABLE_Boost:BOOL=ON
-        -DTPL_ENABLE_BLAS:BOOL=ON
-        -DTPL_ENABLE_LAPACK:BOOL=ON
-        -DTPL_ENABLE_Matio:BOOL=ON
-        -DTPL_ENABLE_Netcdf:BOOL=ON
-        -DTPL_ENABLE_UMFPACK:BOOL=ON
-        -DTPL_ENABLE_Zlib:BOOL=ON
-        -DTPL_ENABLE_GLM:BOOL=OFF
-        -DTPL_ENABLE_QT:BOOL=OFF
+#        -DBUILD_SHARED_LIBS:BOOL=$(option mpi TRUE FALSE)
+#        -DTPL_ENABLE_AMD:BOOL=ON
+#        -DTPL_ENABLE_Boost:BOOL=ON
+#        -DTPL_ENABLE_BLAS:BOOL=ON
+#        -DTPL_ENABLE_LAPACK:BOOL=ON
+#        -DTPL_ENABLE_Matio:BOOL=ON
+#        -DTPL_ENABLE_MPI:BOOL=$(option mpi ON OFF)
+#        -DTPL_ENABLE_Netcdf:BOOL=ON
+#        -DTPL_ENABLE_OpenMP:BOOL=$(option openmp ON OFF)   
+#        -DTPL_ENABLE_UMFPACK:BOOL=ON
+#        -DTPL_ENABLE_Zlib:BOOL=ON
+#        -DTPL_ENABLE_GLM:BOOL=OFF
+#        -DTPL_ENABLE_QT:BOOL=OFF
+#        -DTrilinos_ENABLE_Optika:BOOL=OFF
+#        -DTrilinos_ENABLE_PyTrilinos:BOOL=$(option python ON OFF)
+#        -DTrilinos_ENABLE_STK:BOOL=$(option mpi ON OFF)
+#        -DEpetraExt_BUILD_BTF:BOOL=ON
+#        -DEpetraExt_BUILD_EXPERIMENTAL:BOOL=ON 
+#        -DEpetraExt_BUILD_GRAPH_REORDERINGS:BOOL=ON
+
+        -DTrilinos_ENABLE_NOX:BOOL=ON
+        -DTrilinos_ENABLE_EpetraExt:BOOL=ON
+        -DTrilinos_ENABLE_TrilinosCouplings:BOOL=ON
+        -DTrilinos_ENABLE_Ifpack:BOOL=ON
+        -DTrilinos_ENABLE_ShyLU:BOOL=ON
+        -DTrilinos_ENABLE_Isorropia:BOOL=ON
+        -DTrilinos_ENABLE_AztecOO:BOOL=ON
+        -DTrilinos_ENABLE_Belos:BOOL=ON
+        -DTrilinos_ENABLE_Teuchos:BOOL=ON
+        -DTrilinos_ENABLE_Amesos:BOOL=ON
+        -DTrilinos_ENABLE_Sacado:BOOL=ON
+        -DTrilinos_ENABLE_Kokkos:BOOL=OFF
+        -DTrilinos_ENABLE_Zoltan:BOOL=ON
+        -DTrilinos_ENABLE_ALL_OPTIONAL_PACKAGES:BOOL=OFF
+        
+        -DAmesos_ENABLE_KLU:BOOL=ON
+        -DAmesos_ENABLE_UMFPACK:BOOL=ON
         -DEpetraExt_BUILD_BTF:BOOL=ON
-        -DEpetraExt_BUILD_EXPERIMENTAL:BOOL=ON 
+        -DEpetraExt_BUILD_EXPERIMENTAL:BOOL=ON
         -DEpetraExt_BUILD_GRAPH_REORDERINGS:BOOL=ON
-    )
+        -DNOX_ENABLE_LOCA:BOOL=ON
+        -DTeuchos_ENABLE_COMPLEX:BOOL=ON
+
+        -DTPL_ENABLE_AMD:BOOL=ON
+        -DTPL_ENABLE_BLAS=ON
+        -DTPL_ENABLE_LAPACK:BOOL=ON
+        -DTPL_ENABLE_MPI:BOOL=ON
+        -DTPL_ENABLE_ParMETIS:BOOL=ON
+   )
 
     local x mod
 
     # enable all packages
-    for x in "${TRILINOS_PACKAGES[@]}"; do
-        set $x
-        mod=$1
-        myconf+=( -DTrilinos_ENABLE_${mod}:BOOL=ON )
-        #option trilinos_packages:${mod} && \
-        #    myconf+=( -DTrilinos_ENABLE_${mod}:BOOL=ON )
-    done
+    #for x in "${TRILINOS_PACKAGES[@]}"; do
+    #    set $x
+    #    mod=$1
+    #    myconf+=( -DTrilinos_ENABLE_${mod}:BOOL=ON )
+    #    #option trilinos_packages:${mod} && \
+    #    #    myconf+=( -DTrilinos_ENABLE_${mod}:BOOL=ON )
+    #done
 
-    myconf+=( -DTrilinos_ENABLE_Optika:BOOL=OFF )
-    myconf+=( -DTPL_ENABLE_MPI:BOOL=$(option mpi ON OFF) )
-    myconf+=( -DTrilinos_ENABLE_STK:BOOL=$(option mpi ON OFF) )
     if option mpi; then
         myconf+=(
+            --hates=DCMAKE_C_COMPILER:PATH
+            --hates=DCMAKE_CXX_COMPILER:PATH
+            --hates=DCMAKE_C_FLAGS:STRING
+            --hates=DCMAKE_CXX_FLAGS:STRING
+            -DCMAKE_C_COMPILER:PATH=mpicc
+            -DCMAKE_CXX_COMPILER:PATH=mpic++
+            -DCMAKE_Fortran_COMPILER:PATH=mpif77
             -DTPL_ENABLE_MPI:BOOL=ON
             -DMPI_C_COMPILER:PATH=mpicc
             -DMPI_CXX_COMPILER:PATH=mpic++
             -DMPI_Fortan_COMPILER:PATH=mpif77
+            -DCMAKE_C_FLAGS:STRING="${CFLAGS} -fPIC"
+            -DCMAKE_CXX_FLAGS:STRING="${CXXFLAGS} -fPIC"
+            -DTrilinos_EXTRA_LINK_FLAGS:STRING="-lhdf5_hl -lhdf5 -lcurl -lz -lm -ldl"
+            -DCMAKE_EXE_LINKER_FLAGS:STRING="-lhdf5_hl -lhdf5 -lcurl -lz -lm -ldl"
         )
-    fi
-
-    if option openmp; then
-        myconf+=( -DTPL_ENABLE_OpenMP:BOOL=ON )
+    else
+        myconf+=(
+            -DCMAKE_Fortran_COMPILER:PATH="$(exhost --target)-gfortran"
+        )
     fi
 
     ecmake "${myconf[@]}"
