@@ -1,0 +1,36 @@
+# Copyright 2015 Mykola Orliuk <virkony@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+# Generated for reflection-2
+
+require hackage
+
+SUMMARY="
+Reifies arbitrary terms into types that can be reflected back into terms
+"
+DESCRIPTION="
+This package addresses the configuration problem which is
+propogating configurations that are available at run-time, allowing
+multible configurations to coexist without resorting to mutable
+global variables or System.IO.Unsafe.unsafePerformIO.
+
+That package is an implementation of the ideas presented in the
+paper \"Functional Pearl: Implicit Configurations\" by Oleg Kiselyov
+and Chung-chieh Shan (original paper).
+However, the API has been streamlined to improve performance.
+
+Austin Seipp's tutorial Reflecting values to types and back provides a summary of the
+approach taken by this library, along with more motivating examples.
+"
+HOMEPAGE="http://github.com/ekmett/reflection"
+
+LICENCES="BSD-3"
+PLATFORMS="~amd64"
+
+DEPENDENCIES="
+    $(haskell_lib_dependencies "
+        dev-haskell/template-haskell
+    ")
+"
+
+BUGS_TO="virkony@gmail.com"
+

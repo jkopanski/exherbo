@@ -1,0 +1,22 @@
+# Copyright 2015 Mykola Orliuk <virkony@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+# Generated for wl-pprint-text-1.1.0.4
+
+require hackage
+
+SUMMARY="A Wadler/Leijen Pretty Printer for Text values"
+DESCRIPTION="
+A clone of wl-pprint for use with the text library.
+"
+
+LICENCES="BSD-3"
+PLATFORMS="~amd64"
+
+DEPENDENCIES="
+    $(haskell_lib_dependencies "
+        dev-haskell/text[>=0.11.0.0&<1.3.0.0]
+    ")
+"
+
+BUGS_TO="virkony@gmail.com"
+

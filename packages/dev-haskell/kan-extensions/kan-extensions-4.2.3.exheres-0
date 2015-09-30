@@ -1,0 +1,35 @@
+# Copyright 2015 Mykola Orliuk <virkony@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+# Generated for kan-extensions-4.2.3
+
+require hackage
+
+SUMMARY="
+Kan extensions, Kan lifts, various forms of the Yoneda lemma, and (co)density (co)monads
+"
+DESCRIPTION="
+Kan extensions, Kan lifts, various forms of the Yoneda lemma, and (co)density (co)monads
+"
+HOMEPAGE="http://github.com/ekmett/kan-extensions/"
+
+LICENCES="BSD-3"
+PLATFORMS="~amd64"
+
+DEPENDENCIES="
+    $(haskell_lib_dependencies "
+        dev-haskell/adjunctions[~>4.2]
+        dev-haskell/array[>=0.3.0.2&<0.6]
+        dev-haskell/comonad[=4*]
+        dev-haskell/containers[>=0.4&<0.6]
+        dev-haskell/contravariant[=1*]
+        dev-haskell/distributive[>=0.2.2&<1]
+        dev-haskell/free[=4*]
+        dev-haskell/mtl[>=2.0.1&<2.3]
+        dev-haskell/semigroupoids[>=4&<6]
+        dev-haskell/tagged[>=0.7.2&<1]
+        dev-haskell/transformers[>=0.2&<0.5]
+    ")
+"
+
+BUGS_TO="virkony@gmail.com"
+

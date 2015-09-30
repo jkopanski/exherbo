@@ -1,0 +1,23 @@
+# Copyright 2015 Mykola Orliuk <virkony@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+# Generated for simple-reflect-0.3.2
+
+require hackage
+
+SUMMARY="Simple reflection of expressions containing variables"
+DESCRIPTION="
+This package allows simple reflection of expressions containing variables.
+Reflection here means that a Haskell expression is turned into a string.
+The primary aim of this package is teaching and understanding;
+there are no options for manipulating the reflected expressions beyond showing them.
+"
+HOMEPAGE="http://twanvl.nl/blog/haskell/simple-reflection-of-expressions"
+
+LICENCES="BSD-3"
+PLATFORMS="~amd64"
+
+DEPENDENCIES="
+"
+
+BUGS_TO="virkony@gmail.com"
+

@@ -1,0 +1,47 @@
+# Copyright 2015 Mykola Orliuk <virkony@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+# Generated for unbound-generics-0.2
+
+require hackage
+
+SUMMARY="Support for programming with names and binders using GHC Generics"
+DESCRIPTION="
+Specify the binding structure of your data type with an
+expressive set of type combinators, and unbound-generics
+handles the rest!  Automatically derives
+alpha-equivalence, free variable calculation,
+capture-avoiding substitution, and more. See
+Unbound.Generics.LocallyNameless to get started.
+
+This is an independent re-implementation of Unbound
+but using GHC.Generics
+instead of RepLib.
+See the accompanying README for some porting notes.
+"
+HOMEPAGE="http://github.com/lambdageek/unbound-generics"
+
+LICENCES="BSD-3"
+PLATFORMS="~amd64"
+
+DEPENDENCIES="
+    $(haskell_lib_dependencies "
+        dev-haskell/containers[=0.5*]
+        dev-haskell/contravariant[>=0.5]
+        dev-haskell/deepseq[>=1.3]
+        dev-haskell/mtl[>=2.1]
+        dev-haskell/profunctors[>=4.0]
+        dev-haskell/template-haskell[>=2.8.0.0]
+        dev-haskell/transformers[>=0.3]
+        dev-haskell/transformers-compat[>=0.3]
+    ")
+    $(haskell_test_dependencies "
+        dev-haskell/QuickCheck[~>2.7]
+        dev-haskell/mtl
+        dev-haskell/tasty
+        dev-haskell/tasty-hunit
+        dev-haskell/tasty-quickcheck
+    ")
+"
+
+BUGS_TO="virkony@gmail.com"
+
