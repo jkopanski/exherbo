@@ -1,0 +1,55 @@
+# Copyright 2015 Mykola Orliuk <virkony@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+# Generated for clash-systemverilog-0.5.9
+
+require hackage
+
+SUMMARY="CAES Language for Synchronous Hardware - SystemVerilog backend"
+DESCRIPTION="
+CÎ»aSH (pronounced âclashâ) is a functional hardware description language that
+borrows both its syntax and semantics from the functional programming language
+Haskell. The CÎ»aSH compiler transforms these high-level descriptions to
+low-level synthesizable VHDL, Verilog, or SystemVerilog.
+
+Features of CÎ»aSH:
+
+* Strongly typed (like VHDL), yet with a very high degree of type inference,
+which enables both safe and fast prototying using consise descriptions (like
+Verilog)
+
+* Interactive REPL: load your designs in an interpreter and easily test all
+your component without needing to setup a test bench.
+
+* Higher-order functions, with type inference, result in designs that are
+fully parametric by default.
+
+* Synchronous sequential circuit design based on streams of values, called
+Signals.
+
+* Support for multiple clock domains, with type safe clock domain crossing.
+
+
+This package provides:
+
+* SystemVerilog Backend
+"
+HOMEPAGE="http://www.clash-lang.org/"
+
+LICENCES="BSD-2"
+PLATFORMS="~amd64"
+
+DEPENDENCIES="
+    $(haskell_lib_dependencies "
+        sci-electronics/clash-lib[>=0.5.12]
+        sci-electronics/clash-prelude[>=0.9]
+        dev-haskell/fgl[>=5.4.2.4]
+        dev-haskell/lens[>=3.9.2]
+        dev-haskell/mtl[>=2.1.2]
+        dev-haskell/text[>=0.11.3.1]
+        dev-haskell/unordered-containers[>=0.2.3.3]
+        dev-haskell/wl-pprint-text[>=1.1.0.0]
+    ")
+"
+
+BUGS_TO="virkony@gmail.com"
+
