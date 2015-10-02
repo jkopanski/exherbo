@@ -1,0 +1,58 @@
+# Copyright 2015 Mykola Orliuk <virkony@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+# Generated for clash-prelude-0.9.2
+
+require hackage
+
+SUMMARY="CAES Language for Synchronous Hardware - Prelude library"
+DESCRIPTION="
+CÎ»aSH (pronounced âclashâ) is a functional hardware description language that
+borrows both its syntax and semantics from the functional programming language
+Haskell. The merits of using a functional language to describe hardware comes
+from the fact that combinational circuits can be directly modeled as
+mathematical functions and that functional languages lend themselves very well
+at describing and (de-)composing mathematical functions.
+
+This package provides:
+
+* Prelude library containing datatypes and functions for circuit design
+
+To use the library:
+
+* Import CLaSH.Prelude
+
+* Additionally import CLaSH.Prelude.Explicit if you want to design
+explicitly clocked circuits in a multi-clock setting
+
+A preliminary version of a tutorial can be found in CLaSH.Tutorial, for a
+general overview of the library you should however check out CLaSH.Prelude.
+Some circuit examples can be found in CLaSH.Examples.
+"
+HOMEPAGE="http://www.clash-lang.org/"
+
+LICENCES="BSD-2"
+PLATFORMS="~amd64"
+
+DEPENDENCIES="
+    $(haskell_lib_dependencies "
+        dev-haskell/QuickCheck[>=2.7&<2.9]
+        dev-haskell/array[>=0.5.1.0]
+        dev-haskell/data-default[>=0.5.3]
+        dev-haskell/ghc-typelits-natnormalise[>=0.3]
+        dev-haskell/integer-gmp[>=0.5.1.0]
+        dev-haskell/lens[>=4.9]
+        dev-haskell/singletons[>=1.0]
+        dev-haskell/template-haskell[>=2.9.0.0]
+        dev-haskell/th-lift[>=0.5.6]
+    ")
+    $(haskell_test_dependencies "
+        dev-haskell/Glob[=0.7*]
+        dev-haskell/doctest[>=0.9.1&<0.11]
+    ")
+"
+
+BUGS_TO="virkony@gmail.com"
+
+src_test() {
+    LC_ALL=en_US.UTF-8 cabal_src_test
+}
