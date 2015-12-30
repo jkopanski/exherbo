@@ -1,0 +1,18 @@
+[Unit]
+Description=Jenkins Daemon
+
+[Service]
+EnvironmentFile=/etc/conf.d/jenkins.conf
+ExecStart=/usr/host/bin/java -jar /opt/jenkins/jenkins.war \
+-DJENKINS_HOME=/var/lib/jenkins \
+--logfile=/var/log/jenkins/jenkins.log \
+--httpPort=${PORT} \
+--accessLoggerClassName=winstone.accesslog.SimpleAccessLogger \
+--simpleAccessLogger.format=combined \
+--simpleAccessLogger.file=/var/log/jenkins/access_log \
+$OPTS
+User=jenkins
+Group=jenkins
+
+[Install]
+WantedBy=multi-user.target

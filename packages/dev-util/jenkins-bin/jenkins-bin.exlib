@@ -1,0 +1,47 @@
+# Copyright 2015 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require systemd-service
+
+MY_PN=${PN/-bin}.war
+
+SUMMARY="Continuous integration and continuous delivery application"
+HOMEPAGE="https://jenkins-ci.org/"
+DOWNLOADS="listed-only: http://mirrors.jenkins-ci.org/war/${PV}/${MY_PN}"
+LICENCES="MIT"
+
+DEPENDENCIES="
+    run:
+        group/jenkins
+        user/jenkins
+        virtual/jre:*[>=1.7]
+"
+
+BUGS_TO="jkopanski@quivade.com"
+
+pkg_setup() {
+    exdirectory --allow /opt
+}
+
+src_unpack() {
+    edo mkdir "${WORK}"
+    edo cp "${FETCHEDDIR}/${MY_PN}" "${WORK}"
+}
+
+src_install() {
+    insinto /opt/jenkins
+    doins "${MY_PN}"
+
+    install_systemd_files
+    insinto /etc/conf.d
+    doins "${IMAGE}/${SYSTEMDSYSTEMUNITDIR}"/jenkins.conf
+    edo rm "${IMAGE}/${SYSTEMDSYSTEMUNITDIR}"/jenkins.conf
+
+
+    keepdir \
+            /var/log/jenkins \
+            /var/lib/jenkins
+    edo chown jenkins:jenkins \
+            "${IMAGE}"/var/log/jenkins \
+            "${IMAGE}"/var/lib/jenkins
+}
