@@ -1,0 +1,13 @@
+[Unit]
+Description=Slurm DBD accounting daemon
+After=network.target
+
+[Service]
+Type=forking
+User=slurm
+EnvironmentFile=/etc/conf.d/slurm.conf
+ExecStart=/usr/host/bin/slurmdbd $SLURMDBD_OPTIONS
+PIDFile=/run/slurm/slurmdbd.pid
+
+[Install]
+WantedBy=multi-user.target

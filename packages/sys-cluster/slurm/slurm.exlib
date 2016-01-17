@@ -1,0 +1,142 @@
+# Copyright 2015 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'slurm-2.6.3.ebuild' from Gentoo, which is:
+#    Copyright 1999-2014 Gentoo Foundation
+
+MY_PNV="${PNV//./-}"
+require github [ user=SchedMD pn=${PN} tag=${MY_PNV} ]
+
+export_exlib_phases src_prepare src_install
+
+SUMMARY="Slurm workload manager"
+DESCRIPTION="
+Slurm is an open-source workload manager designed for Linux clusters of all sizes.
+It provides three key functions. First it allocates exclusive
+and/or non-exclusive access to resources (computer nodes) to users for
+some duration of time so they can perform work.
+Second, it provides a framework for starting, executing, and monitoring work
+(typically a parallel job) on a set of allocated nodes.
+Finally, it arbitrates contention for resources by managing a queue of pending work.
+"
+HOMEPAGE="http://${PN}.schedmd.com/${PN}.html"
+
+LICENCES="GPL-2"
+SLOT="0"
+MYOPTIONS="
+    mysql
+    pam
+    ( providers: libressl openssl ) [[ number-selected = exactly-one ]]
+"
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/hwloc
+        dev-libs/json-c
+        mysql? ( dev-db/mysql )
+        net-misc/curl
+        pam? ( sys-libs/pam )
+        providers:libressl? ( dev-libs/libressl )
+        providers:openssl? ( dev-libs/openssl )
+        sys-cluster/openmpi
+        sys-libs/ncurses
+        sys-libs/readline
+        sys-libs/zlib
+    run:
+        group/slurm
+        user/slurm
+    suggestion:
+        sys-auth/auks [[
+            description = [ kerberos integration ]
+        ]]
+"
+
+BUGS_TO="jkopanski@quivade.com"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-glibtest
+    --disable-gtktest
+    --disable-multiple-slurmd
+    --enable-front-end
+    --enable-simulator
+    --hates=sysconfdir
+    --sysconfdir=/etc/slurm
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    "pam"
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    "mysql mysql_config"
+)
+
+DEFAULT_SRC_COMPILE_PARAMS=(
+    CC=mpicc
+    CXX=mpic++
+)
+
+slurm_src_prepare() {
+    default
+
+    # fix included dejagnu for gcc 5.1
+    edo sed -e 's/inline void/static inline void/' -i testsuite/dejagnu.h
+
+    # Exherbo uses /sys/fs/cgroup instead of /cgroup
+    # FIXME: replace occurences inside html tags
+    edo sed \
+        -e 's|\([ =\"]\)/cgroup|\1/sys/fs/cgroup|g' \
+        -i doc/man/man5/cgroup.conf.5 \
+        -i doc/html/cgroups.shtml \
+        -i etc/cgroup.release_common.example.in \
+        -i src/common/xcgroup_read_config.c
+
+    # Pids should go to /run/slurm
+    edo sed -e 's:/var/run/slurmctld.pid:/run/slurm/slurmctld.pid:g' \
+        -e 's:/var/run/slurmd.pid:/run/slurm/slurmd.pid:g' \
+        -i etc/slurm.conf.example
+    # also state dirs are in /var/spool/slurm
+    edo sed -e 's:StateSaveLocation=*.:StateSaveLocation=/var/spool/slurm:g' \
+        -e 's:SlurmdSpoolDir=*.:SlurmdSpoolDir=/var/spool/slurm/slurmd:g' \
+        -i etc/slurm.conf.example
+    # and tmp should go to /var/tmp/slurm
+    edo sed -e 's:/tmp:/var/tmp:g' \
+        -i etc/slurm.conf.example
+
+    # --htmldir does not seems to propagate... Documentations are installed
+    # in /usr/share/doc/slurm-2.3.0/html
+    # instead of /usr/share/doc/slurm-2.3.0.2/html
+    edo sed -e "s|htmldir = .*/html|htmldir = \${docdir}/html|g" \
+        -i doc/html/Makefile.in \
+        -i doc/man/man1/Makefile.in \
+        -i doc/man/man3/Makefile.in \
+        -i doc/man/man5/Makefile.in \
+        -i doc/man/man8/Makefile.in
+}
+
+slurm_src_install() {
+    default
+
+    keepdir /etc/slurm
+    insinto /etc/slurm
+    doins etc/bluegene.conf.example
+    doins etc/cgroup.conf.example
+    doins etc/cgroup_allowed_devices_file.conf.example
+    doins etc/slurm.conf.example
+    doins etc/slurmdbd.conf.example
+    exeinto /etc/slurm
+    doexe etc/cgroup.release_common.example
+    doexe etc/slurm.epilog.clean
+
+    insinto /etc/conf.d
+    doins "${FILES}"/slurm.conf
+
+    keepdir /var/spool/slurm
+    edo chown slurm:slurm "${IMAGE}"/var/spool/slurm
+
+    insinto /usr/$(exhost --target)/lib/tmpfiles.d
+    hereins ${PN}.conf <<EOF
+d /run/slurm 0755 slurm slurm
+EOF
+
+    install_systemd_files
+}

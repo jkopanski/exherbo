@@ -1,0 +1,16 @@
+[Unit]
+Description=Slurm node daemon
+After=network.target
+
+[Service]
+Type=forking
+User=slurm
+EnvironmentFile=/etc/conf.d/slurm.conf
+ExecStart=/usr/host/bin/slurmd $SLURMD_OPTIONS
+PIDFile=/run/slurm/slurmd.pid
+LimitNOFILE=51200
+LimitMEMLOCK=infinity
+LimitSTACK=infinity
+
+[Install]
+WantedBy=multi-user.target
