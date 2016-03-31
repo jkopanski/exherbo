@@ -1,0 +1,12 @@
+[Unit]
+Description=nslcd
+
+[Service]
+User=nslcd
+Group=nslcd
+Type=simple
+ExecStart=/usr/host/bin/nslcd --nofork
+
+[Install]
+WantedBy=multi-user.target
+

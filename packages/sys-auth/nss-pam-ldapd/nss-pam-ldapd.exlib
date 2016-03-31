@@ -1,0 +1,60 @@
+# Copyright 2016 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require github [ user=arthurdejong pn=${PN} tag=${PV} ] systemd-service
+
+export_exlib_phases src_test src_install
+
+SUMMARY="Use an LDAP server for identity and authentication management on unix systems."
+
+LICENCES="LGPL-2.1"
+SLOT="0"
+MYOPTIONS="
+    kerberos
+    ldap
+    pam
+    sasl
+"
+
+DEPENDENCIES="
+    build+run:
+        kerberos? ( virtual/kerberos )
+        ldap? ( net-directory/openldap )
+        pam? ( sys-libs/pam )
+        sasl? ( net-libs/cyrus-sasl )
+    run:
+        group/nslcd
+        user/nslcd
+"
+
+BUGS_TO="jkopanski@quivade.com"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-nslcd-pidfile=/run/nslcd/nslcd.pid
+    --with-pam-seclib-dir=/usr/$(exhost --target)/lib/security
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    kerberos
+    ldap
+    pam
+    sasl
+)
+
+nss-pam-ldapd_src_test() {
+    esandbox allow_net 'unix:/tmp/test_getpeercred.sock'
+    default
+    esandbox disallow_net 'unix:/tmp/test_getpeercred.sock'
+}
+
+nss-pam-ldapd_src_install() {
+    default
+    edo chown nslcd:nslcd "${IMAGE}"/etc/nslcd.conf
+
+    insinto /usr/$(exhost --target)/lib/tmpfiles.d
+    hereins ${PN}.conf <<EOF
+d /run/nslcd 0755 nslcd nslcd
+EOF
+
+    install_systemd_files
+}
