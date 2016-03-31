@@ -1,0 +1,76 @@
+# Copyright 2016 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require sourceforge [ project=${PN} pn=${PN}2 suffix=tar.bz2 ] waf
+
+if evet is_scm; then
+    require scm-git
+    SCM_REPOSITORY="git://git.code.sf.net/p/${PN}/git"
+fi
+
+SUMMARY="Virtual guitar amplifier"
+DESCRIPTION="
+Guitarix is a virtual guitar amplifier for Linux running on Jack Audio Connection Kit.
+Guitarix takes the signal from your guitar as any real amp would do:
+as a mono-signal from your sound card.
+The input is processed by a main amp and a rack-section.
+Both can be routed separately and deliver a processed stereo-signal via Jack.
+You may fill the rack with effects from more than 25 built-in modules
+including stuff from a simple noise gate to brain-slashing modulation f/x
+like flanger, phaser or auto-wah.
+"
+HOMEPAGE="http://guitarix.org/"
+
+LICENCES="GPL-3"
+SLOT="0"
+MYOPTIONS="
+    avahi [[ description =
+        [ automatic discoveru of Guitarix server instances ] ]]
+    bluetooth [[ description =
+        [ support remote connection to Guitarix server instances ] ]]
+    ladspa [[ description = [ build ladspa plugins ] ]]
+"
+
+DEPENDENCIES="
+    build+run:
+        avahi? ( net-dns/avahi )
+        bluetooth? ( net-wireless/bluez )
+        dev-cpp/cairomm
+        dev-cpp/libsigc++
+        dev-libs/atk
+        dev-libs/boost
+        dev-libs/glib
+        gnome-bindings/atkmm
+        gnome-bindings/glibmm[>=2.24]
+        gnome-bindings/gtkmm:2.4[>=2.20]
+        gnome-bindings/pangomm
+        media-libs/fontconfig
+        media-libs/freetype
+        media-libs/liblrdf
+        media-libs/libsndfile
+        media-libs/lilv
+        media-sound/jack-audio-connection-kit
+        net-libs/webkit-gtk
+        sci-libs/eigen:3
+        sci-libs/fftw
+        x11-libs/cairo
+        x11-libs/gdk-pixbuf
+        x11-libs/pango
+"
+
+BUGS_TO="jkopanski@quivade.com"
+
+WAF_DEFAULT_PARAMS=(
+    --hates=bindir
+    --hates=sbindir
+    --hates=htmldir
+)
+
+WAF_SRC_CONFIGURE_OPTIONS=(
+    '!avahi --no-avahi'
+    '!bluetooth --no-bluez'
+    '!ladspa --no-ladspa'
+    '!ladspa --no-new-ladspa'
+)
+
+RESTRICT=test
