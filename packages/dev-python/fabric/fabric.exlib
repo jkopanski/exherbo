@@ -1,0 +1,29 @@
+# Copyright 2016 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require github [ user=${PN} pn=${PN} tag=${PV} ]
+require setup-py [ import=setuptools blacklist="3" ]
+
+SUMMARY="Python library and command-line tool for application deployment
+or systems administration tasks."
+DESCRIPTION="
+Fabric provides a basic suite of operations for executing local or remote
+shell commands (normally or via sudo) and uploading/downloading files,
+as well as auxiliary functionality such as prompting
+the running user for input, or aborting execution.
+"
+HOMEPAGE="http://www.fabfile.org/"
+
+LICENCES="BSD-2"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-python/fudge[<1.0][python_abis:*(-)?]
+    build+run:
+        dev-python/paramiko[python_abis:*(-)?]
+"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/changelog.html"
+UPSTREAM_DOCUMENTATION="http://docs.fabfile.org/"

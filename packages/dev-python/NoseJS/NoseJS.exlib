@@ -1,0 +1,23 @@
+# Copyright 2016 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require pypi setup-py [ import=setuptools ]
+
+SUMMARY="Nose plugin for integrating JavaScript tests into a Python test suite."
+
+DESCRIPTION="
+NoseJS is designed for Python projects that require
+JavaScript code for some Web functionality.
+It currently has two features:
+- Discover and run JavaScript tests alongside Python tests
+- Validate JavaScript syntax (check for lint).
+"
+
+LICENCES="MIT"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-python/nose[python_abis:*(-)?]
+"

@@ -1,0 +1,29 @@
+# Copyright 2016 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require pypi setup-py [ import=setuptools ]
+
+SUMMARY="
+Python module for using fake objects (mocks and stubs)
+to test real ones.
+"
+DESCRIPTION="
+Fudge was inspired by Mocha which is a simpler version of jMock.
+But unlike Mocha, Fudge does not automatically hijack real objects;
+you explicitly patch them in your test.
+"
+HOMEPAGE="http://farmdev.com/projects/fudge/"
+
+LICENCES="MIT"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-python/Sphinx[python_abis:*(-)?]
+    test:
+        dev-python/nose[python_abis:*(-)?]
+        dev-python/NoseJS[python_abis:*(-)?]
+"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/#changelog"
