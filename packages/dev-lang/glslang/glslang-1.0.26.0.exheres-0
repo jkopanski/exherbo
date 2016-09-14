@@ -1,0 +1,37 @@
+# Copyright 2016 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require cmake
+require github [ user=KhronosGroup pn=${PN} rev=81cd764b5ffc475bc73f1fb35f75fd1171bb2343 ]
+
+SUMMARY="Reference front-end for GLSL and ESSL, and sample SPIR-V generator"
+HOMEPAGE="https://www.khronos.org/opengles/sdk/tools/Reference-Compiler/"
+PLATFORMS="~amd64"
+
+LICENCES="BSD-3"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+BUGS_TO="jkopanski@quivade.com"
+
+src_install() {
+    cmake_src_install
+
+    insinto /usr/$(exhost --target)/include/glslang/SPIRV
+    doins SPIRV/*.h
+    doins SPIRV/*.hpp
+
+    insinto /usr/$(exhost --target)/include/glslang/Include
+    doins glslang/Include/*.h
+
+    insinto /usr/$(exhost --target)/include/glslang/MachineIndependent
+    doins glslang/MachineIndependent/*.h
+
+    insinto /usr/$(exhost --target)/include/glslang/OSDependent
+    doins glslang/OSDependent/*.h
+
+    insinto /usr/$(exhost --target)/include/glslang/Public
+    doins glslang/Public/*.h
+}

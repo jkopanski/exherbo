@@ -1,0 +1,32 @@
+# Copyright 2016 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+MY_PN=SPIRV-Headers
+MY_PV=33d41376d378761ed3a4c791fc4b647761897f26
+MY_PNV=${MY_PN}-${MY_PV}
+
+require cmake
+require github [ user=KhronosGroup pn=${PN} rev=${MY_PV} ]
+
+SUMMARY="Reference front-end for GLSL and ESSL, and sample SPIR-V generator"
+HOMEPAGE="https://www.khronos.org/spir/"
+PLATFORMS="~amd64"
+
+LICENCES="MIT"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES="
+"
+
+WORK="${WORKBASE}/${MY_PNV}"
+
+BUGS_TO="jkopanski@quivade.com"
+
+CMAKE_SRC_CONFIGURE_PARAMS=(
+    "-DCMAKE_INSTALL_PREFIX=${IMAGE}/usr/$(exhost --target)"
+)
+
+src_install() {
+    cmake_run emake -j1 install-headers
+}

@@ -1,0 +1,30 @@
+# Copyright 2016 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+MY_PN=SPIRV-Tools
+MY_PV=923a4596b44831a07060df45caacb522613730c9
+MY_PNV=${MY_PN}-${MY_PV}
+
+require cmake
+require github [ user=KhronosGroup pn=${PN} rev=${MY_PV} ]
+
+SUMMARY="API and commands for processing SPIR-V modules"
+HOMEPAGE="https://www.khronos.org/spir/"
+PLATFORMS="~amd64"
+
+LICENCES="Apache-2.0"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-libs/spirv-headers[=${PV}]
+"
+
+WORK="${WORKBASE}/${MY_PNV}"
+
+BUGS_TO="jkopanski@quivade.com"
+
+CMAKE_SRC_CONFIGURE_PARAMS=(
+    "-DSPIRV-Headers_SOURCE_DIR=/usr/$(exhost --target)"
+)

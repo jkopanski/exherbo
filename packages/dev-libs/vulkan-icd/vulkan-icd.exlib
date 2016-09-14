@@ -1,0 +1,82 @@
+# Copyright 2016 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+MY_PN=Vulkan-LoaderAndValidationLayers
+
+require cmake
+require github [ user=KhronosGroup pn=${MY_PN} tag=sdk-${PV} ]
+
+export_exlib_phases src_prepare src_install
+
+SUMMARY="Vulkan ICD (Installable Client Driver) Loader"
+DESCRIPTION="
+Vulkan is a new generation graphics and compute API that provides
+high-efficiency, cross-platform access to modern GPUs
+used in a wide variety of devices from PCs and consoles
+to mobile phones and embedded platforms.
+"
+HOMEPAGE="https://www.khronos.org/vulkan/"
+
+LICENCES="Apache-2.0"
+SLOT="0"
+MYOPTIONS="
+    debug
+    wayland
+    X
+"
+
+DEPENDENCIES="
+    build:
+        dev-libs/spirv-headers[=${PV}]
+    build+run:
+        dev-lang/glslang[=${PV}]
+        dev-libs/spirv-tools[=${PV}]
+        wayland? ( sys-libs/wayland )
+        X? ( x11-proto/xcb-proto )
+"
+
+BUGS_TO="jkopanski@quivade.com"
+
+CMAKE_SRC_CONFIGURE_PARAMS=(
+    "-DGLSLANG_SPIRV_INCLUDE_DIR:PATH=/usr/$(exhost --target)/include/glslang/"
+)
+
+CMAKE_SRC_CONFIGURE_OPTIONS=(
+    'wayland  BUILD_WSI_WAYLAND_SUPPORT'
+    'X  BUILD_WSI_XCB_SUPPORT'
+    'X  BUILD_WSI_XLIB_SUPPORT'
+)
+
+vulkan-icd_src_prepare() {
+    default
+
+    edo sed -e 's#"/usr/" DATADIR#DATAROOTDIR#' \
+            -i loader/vk_loader_platform.h
+
+    edo sed -e 's/DATADIR/DATAROOTDIR/g' \
+            -i CMakeLists.txt \
+            -i loader/vk_loader_platform.h
+}
+
+vulkan-icd_src_install() {
+    keepdir /{etc,usr/share}/vulkan/{icd.d,{explicit,implicit}_layer.d}
+
+    exeinto /usr/$(exhost --target)/bin
+    doexe ${WORKBASE}/build/demos/{cube,smoketest,tri,vulkaninfo}
+    doexe ${WORKBASE}/build/libs/vkjson/vkjson_info
+
+    insinto /usr/$(exhost --target)/lib
+    dolib.so ${WORKBASE}/build/layers/*.so
+    dolib.so ${WORKBASE}/build/loader/libvulkan.so*
+
+    insinto /usr/$(exhost --target)/include/vulkan
+    doins include/vulkan/*.h
+
+    for i in layers/linux/*.json ; do
+        edo sed 's@./@@' $i > "${IMAGE}"/usr/share/vulkan/explicit_layer.d/$(basename $i)
+    done
+
+    insinto /usr/share/doc/${PNV}
+    doins README.md
+    doins loader/LoaderAndLayerInterface.md
+}
