@@ -1,4 +1,4 @@
-# Copyright 2015 Jakub Kopański <jkopanski@quivade.com>
+# Copyright 2016 Jakub Kopański <jkopanski@quivade.com>
 # Distributed under the terms of the GNU General Public License v2
 
 MY_PN=Xyce
@@ -84,20 +84,8 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     '!mpi shared'
 )
 
-src_prepare() {
-    # conflicts with old C code
-    edo sed -e '/using std::isnan/d' -i src/DeviceModelPKG/Core/src/N_DEV_DeviceSupport.C
-    edo sed -e '/using std::isinf/d' -i src/DeviceModelPKG/Core/src/N_DEV_DeviceSupport.C
-
-    # missing namespace
-    edo sed -e 's/endl/std::endl/' -i src/LinearAlgebraServicesPKG/src/N_LAS_IfpackPrecond.C
-    edo sed -e 's/string/std::string/' -i src/NonlinearSolverPKG/src/N_NLS_NOX_SharedSystem.C
-    edo sed -e 's/cout/std::cout/' -i src/test/LinearAlgebraTest/testBlockLinearSystems.C
-    edo sed -e 's/endl/std::endl/' -i src/test/LinearAlgebraTest/testBlockLinearSystems.C
-}
-
 src_configure() {
-    # fix a build errot since, some deps require c++11
+    # fix a build error since, some deps require c++11
     export CXXFLAGS="${CXXFLAGS} -std=c++11"
     if option mpi; then
         export CC=mpicc
