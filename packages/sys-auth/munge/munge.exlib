@@ -1,0 +1,77 @@
+# Copyright 2015 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require github [ user=dun pn=${PN} suffix=tar.xz release=${PNV} ] systemd-service
+
+export_exlib_phases src_prepare src_configure src_install
+
+SUMMARY="MUNGE Uid 'N' Gid Emporium"
+DESCRIPTION="
+Authentication service for creating and validating credentials.
+It is designed to be highly scalable for use in an HPC cluster environment.
+It allows a process to authenticate the UID and GID of another local or remote process
+within a group of hosts having common users and groups.
+These hosts form a security realm that is defined by a shared cryptographic key.
+Clients within this security realm can create and validate credentials
+without the use of root privileges, reserved ports, or platform-specific methods.
+"
+HOMEPAGE="http://dun.github.io/${PN}/"
+
+LICENCES="GPL-3"
+SLOT="0"
+MYOPTIONS="
+    ( providers: gnutls libressl openssl ) [[ number-selected = exactly-one ]]
+"
+
+DEPENDENCIES="
+    build+run:
+        app-arch/bzip2
+        providers:gnutls? ( dev-libs/libgcrypt )
+        providers:libressl? ( dev-libs/libressl )
+        providers:openssl? ( dev-libs/openssl )
+        sys-libs/zlib
+    run:
+        group/munge
+        user/munge
+ "
+
+BUGS_TO="jkopanski@quivade.com"
+
+munge_src_prepare() {
+    default
+
+    edo sed -e 's#X_LOCALSTATEDIR "/run#"/run#' \
+            -i src/libcommon/munge_defs.h
+}
+
+munge_src_configure() {
+    econf \
+        --with-crypto-lib=$(option providers:gnutls libgcrypt openssl) \
+        --localstatedir=/var
+}
+
+munge_src_install() {
+    default
+
+    keepdir /etc/munge
+    keepdir /var/{lib,log}/munge
+
+    edo chown munge:munge "${IMAGE}"/var/{lib,log}/munge
+    edo chmod 0700 "${IMAGE}"/etc/munge
+    edo chmod 0711 "${IMAGE}"/var/lib/munge
+    edo chmod 0700 "${IMAGE}"/var/log/munge
+
+    rm "${IMAGE}"/etc/init.d/munge
+    rm "${IMAGE}"/etc/default/munge
+    rmdir "${IMAGE}"/etc/init.d
+    rmdir "${IMAGE}"/etc/default
+    rmdir "${IMAGE}"/var/run/munge
+    rmdir "${IMAGE}"/var/run
+
+    insinto /usr/$(exhost --target)/lib/tmpfiles.d
+    hereins ${PN}.conf <<EOF
+d /run/munge 0755 munge munge -
+EOF
+
+    install_systemd_files
+}
