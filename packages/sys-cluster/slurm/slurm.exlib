@@ -3,8 +3,7 @@
 # Based in part upon 'slurm-2.6.3.ebuild' from Gentoo, which is:
 #    Copyright 1999-2014 Gentoo Foundation
 
-MY_PNV="${PNV//./-}"
-require github [ user=SchedMD pn=${PN} tag=${MY_PNV} ]
+require github [ user=SchedMD pn=${PN} tag=${PNV//./-} ]
 
 export_exlib_phases src_prepare src_install
 
