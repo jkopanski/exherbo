@@ -44,6 +44,10 @@ DEPENDENCIES="
     run:
         group/slurm
         user/slurm
+    recommendation:
+        sys-auth/munge [[
+            description = [ preferred authentication method ]
+        ]]
     suggestion:
         sys-auth/auks [[
             description = [ kerberos integration ]
