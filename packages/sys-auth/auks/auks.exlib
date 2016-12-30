@@ -1,0 +1,43 @@
+# Copyright 2015 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ]
+require github [ user=hautreux pn=${PN} tag=${PV} ] systemd-service
+
+export_exlib_phases src_install
+
+SUMMARY="Ease kerberos V credential support"
+DESCRIPTION="
+Utility to ease kerberos V credential support addition to non-interactive applications,
+like batch systems (LSF,Torque,...) or resource managers (Slurm,...).
+It includes a plugin for SLURM resource manager
+"
+
+LICENCES="CeCILL"
+SLOT="0"
+MYOPTIONS="
+    ( providers: gnutls libressl openssl ) [[ number-selected = exactly-one ]]
+"
+
+DEPENDENCIES="
+    build+run:
+        providers:gnutls? ( dev-libs/libgcrypt )
+        providers:libressl? ( dev-libs/libressl )
+        providers:openssl? ( dev-libs/openssl )
+        virtual/kerberos
+"
+
+BUGS_TO="jkopanski@quivade.com"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --hates=disable-silent-rules
+)
+
+auks_src_install() {
+    default
+
+    insinto /etc/conf.d
+    doins "${FILES}"/auks.conf
+
+    install_systemd_files
+}
