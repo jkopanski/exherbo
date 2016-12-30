@@ -3,7 +3,7 @@
 # Based in part upon 'slurm-2.6.3.ebuild' from Gentoo, which is:
 #    Copyright 1999-2014 Gentoo Foundation
 
-require github [ user=SchedMD pn=${PN} tag=${PNV//./-} ]
+require github [ user=SchedMD pn=${PN} tag=${PNV//./-} ] systemd-service
 
 export_exlib_phases src_prepare src_install
 
