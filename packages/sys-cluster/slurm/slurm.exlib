@@ -82,9 +82,6 @@ DEFAULT_SRC_COMPILE_PARAMS=(
 slurm_src_prepare() {
     default
 
-    # fix included dejagnu for gcc 5.1
-    edo sed -e 's/inline void/static inline void/' -i testsuite/dejagnu.h
-
     # Exherbo uses /sys/fs/cgroup instead of /cgroup
     # FIXME: replace occurences inside html tags
     edo sed \
