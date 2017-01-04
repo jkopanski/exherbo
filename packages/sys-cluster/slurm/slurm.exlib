@@ -56,10 +56,10 @@ DEPENDENCIES="
 BUGS_TO="jkopanski@quivade.com"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-front-end
     --disable-glibtest
     --disable-gtktest
     --disable-multiple-slurmd
-    --enable-front-end
     --enable-simulator
     --hates=sysconfdir
     --sysconfdir=/etc/slurm
