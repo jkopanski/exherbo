@@ -1,0 +1,26 @@
+# Copyright 2017 Jakub Kopański <jkopanski@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require github [ user=jwilm pn=${PN} tag=v${PV} ]
+require cargo
+
+SUMMARY="GPU-accelerated terminal emulator"
+DESCRIPTION="
+Alacritty is focused on simplicity and performance.
+The performance goal means it should be faster than any other terminal emulator available.
+The simplicity goal means that it doesn't have features such as tabs or splits
+(which can be better provided by a window manager or terminal multiplexer)
+nor niceties like a GUI config editor.
+"
+
+LICENCES="Apache-2.0"
+SLOT="0"
+PLATFORMS="~amd64"
+
+DEPENDENCIES="
+    build+run:
+        media-libs/fontconfig
+        media-libs/freetype
+"
+
+BUGS_TO="jkopanski@quivade.com"
