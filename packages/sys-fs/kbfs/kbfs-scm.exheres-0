@@ -1,0 +1,48 @@
+# Copyright 2017 Jakub Kopański <jakub@quivade.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require github [ user=keybase ]
+
+SUMMARY="Keybase Filesystem"
+HOMEPAGE="https://keybase.io/"
+
+LICENCES="BSD-3"
+SLOT="0"
+PLATFORMS="~amd64"
+
+DEPENDENCIES="
+    build:
+        dev-lang/go[>=1.7.1]
+    build+run:
+        sys-fs/fuse
+"
+
+BUGS_TO="jakub@quivade.com"
+
+src_prepare() {
+    edo mkdir -p "${WORK}"/.gopath/src/github.com/keybase/
+    edo ln -s "${WORK}" "${WORK}"/.gopath/src/github.com/keybase/kbfs
+    edo mkdir bin
+
+    edo mkdir -p "${WORK}"/.vendor/src
+    edo pushd "${WORK}"/vendor
+    for v in *; do
+        edo ln -s "${v}" "${WORK}/.vendor/src/${v}"
+    done
+    edo popd
+}
+
+src_compile() {
+    export SOURCE_GOPATH="${WORK}/.gopath"
+    export VENDOR_GOPATH="${WORK}/.vendor"
+    export GOPATH="${SOURCE_GOPATH}:${VENDOR_GOPATH}"
+
+    edo go build \
+        -o "${WORK}"/bin/kbfsfuse \
+        -tags production \
+        github.com/keybase/kbfs/kbfsfuse
+}
+
+src_install() {
+    dobin bin/*
+}
