@@ -14,6 +14,7 @@ DEPENDENCIES="
     build:
         dev-lang/go[>=1.7.1]
     build+run:
+        dev-scm/git
         sys-fs/fuse
 "
 
@@ -41,6 +42,16 @@ src_compile() {
         -o "${WORK}"/bin/kbfsfuse \
         -tags production \
         github.com/keybase/kbfs/kbfsfuse
+
+    edo go build \
+        -o "${WORK}"/bin/kbfsgit \
+        -tags production \
+        github.com/keybase/kbfs/kbfsgit
+
+    edo go build \
+        -o "${IMAGE}"/usr/$(exhost --target)/libexec/git/git-remote-keybase \
+        -tags production \
+        github.com/keybase/kbfs/kbfsgit/git-remote-keybase
 }
 
 src_install() {
